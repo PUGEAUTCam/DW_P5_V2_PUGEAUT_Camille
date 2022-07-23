@@ -1,11 +1,11 @@
 // Appelle a l'API 
 // recuperation dynamique des donnees a afficher pour implementer la page
 
-let url = 'http://localhost:3000/api/product/';
+let urlAPI = 'http://localhost:3000/api/products/';
 
 
 
-fetch(url)
+fetch(urlAPI)
     .then(response => response.json())
 
     .then((data) => {
@@ -33,16 +33,9 @@ fetch(url)
 
         document.querySelector('#items').innerHTML = content;
 
-    }).catch((err) => {
+    }) .catch(() => document.querySelector('#items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
+     
 
-        document.querySelector('#items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.';
-    
-    });
-
-   
-
-
- 
 
 
 
