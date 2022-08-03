@@ -3,6 +3,8 @@ const cart = async () => {
     //Recuperation du tableau d'objets enregistres dans le Local Storage 
     const productsInBasket = JSON.parse(localStorage.getItem('products'));
 
+
+
     // Get all products pour recuperer les donnees qui me manquent dans le LS
     let urlAPI = 'http://localhost:3000/api/products/';
 
@@ -11,6 +13,7 @@ const cart = async () => {
         .catch(() => document.querySelector('#cart__items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
         
         
+
     //Apelle de la fonction complete product pour creer un tableau a partir des donnees API et du LS
     let completeProductInBasket = completeProduct(productsInBasket, products);
 
@@ -53,8 +56,6 @@ const cart = async () => {
                     </article> `
     }
     document.querySelector('#cart__items').innerHTML = content;
-    
-
 }
 
 cart();

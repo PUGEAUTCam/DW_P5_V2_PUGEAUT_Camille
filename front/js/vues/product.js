@@ -1,4 +1,4 @@
-// Je recupere grace a URLSearchParams la donnee ID qui va me servir a recuperer les donnees d'un seul canape via la requete get + ID de l'API.
+// Je recupere grace a URLSearchParams la donnee ID qui va me servir a recuperer les donnees d'un seul canape via la requete get + ID.
 
 let params = new URLSearchParams(window.location.search);
 const id = params.get('id');
@@ -43,11 +43,9 @@ fetch(urlAPIProduct) //Get One product
 const idAddToCart = document.querySelector('#addToCart')
 
 
-
-
 idAddToCart.addEventListener('click', () => {
 
-    // Variables et objet qui correspondent aux donnees que je veux stocker dans le LS
+    // Variables et objet final qui correspondent aux donnees que je veux stocker dans le LS
     let idColors = document.querySelector('#colors');
     let colorsChoice = idColors.value;
 
@@ -60,7 +58,7 @@ idAddToCart.addEventListener('click', () => {
         quantity: quantity,
     }
 
-    //Je verifie que le client indique la couleur et la qte, si oui j'applique la fonction addBasket en passant en parametre mon finalProduct pour stocker mes 3 donnees dans le LS
+    //Je verifie que le client indique la couleur et la qté, si oui j'applique la fonction addBasket en passant en parametre mon finalProduct pour stocker mes 3 donnees dans le LS
 
     if (colorsChoice === '') {
         alert('Veuillez sélectionner une couleur pour votre canapé');
