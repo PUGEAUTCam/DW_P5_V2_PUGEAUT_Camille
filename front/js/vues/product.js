@@ -5,14 +5,12 @@ const id = params.get('id');
 
 let urlAPIProduct = `http://localhost:3000/api/products/${id}`;
 
-
 // Je recupere les donnees d'un canape pour la page produit et les insere dans la page grace a createElement, appendChild lorsqu'il faut creer une balise HTML, ou textContent lorsqu'il faut simplement ajouter du texte.
 
-
-fetch(urlAPIProduct)
+fetch(urlAPIProduct) //Get One product
     .then(response => response.json())
 
-    .then((dataProduct) => {
+    .then(dataProduct => {
 
         let imgKanap = document.createElement('img');
         imgKanap.src = dataProduct.imageUrl;
@@ -35,44 +33,47 @@ fetch(urlAPIProduct)
             colorKanap.value = color;
             colorKanap.textContent = color;
             document.querySelector('#colors').appendChild(colorKanap);
-        }      
+        }
 
-    }) .catch(() => document.querySelector('.item__img').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
-     
+    }).catch(() => document.querySelector('.item__img').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
 
-// Recuperation de la couleur et quantite selectionnees par l'utilisateur pour le local Storage
 
-const addToCart = document.querySelector('#addToCart')
 
-addToCart.addEventListener('click', () => {
+//Selection du bouton "ajouter au panier" et ajout d'un evenement au clic qui declenche mes fonctions
+const idAddToCart = document.querySelector('#addToCart')
 
+
+
+
+idAddToCart.addEventListener('click', () => {
+
+    // Variables et objet qui correspondent aux donnees que je veux stocker dans le LS
     let idColors = document.querySelector('#colors');
     let colorsChoice = idColors.value;
-    console.log(colorsChoice);
 
-   let idQuantity = document.querySelector('#quantity');
-   let quantity = idQuantity.value;
-   console.log(quantity);
+    let idQuantity = document.querySelector('#quantity');
+    let quantity = idQuantity.value;
 
-   console.log(id);
+    let finalProduct = {
+        id: id,
+        color: colorsChoice,
+        quantity: quantity,
+    }
 
-})
+    //Je verifie que le client indique la couleur et la qte, si oui j'applique la fonction addBasket en passant en parametre mon finalProduct pour stocker mes 3 donnees dans le LS
+
+    if (colorsChoice === '') {
+        alert('Veuillez sélectionner une couleur pour votre canapé');
+    } else if (quantity == 0) {
+        alert('Veuillez renseigner une quantité');
+    } else {
+        addBasket(finalProduct);
+        confirm();
+    }
+
+});
 
 
 
 
 
-
-
-
-//Local Storage
-// const product = {
-//     id: id,
-    
-// }
-
-
-
-// const productJson = JSON.parse(localStorage.getItem('product'));
-
-// localStorage.setItem('product', '')

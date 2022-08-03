@@ -5,7 +5,7 @@ let urlAPI = 'http://localhost:3000/api/products/';
 
 
 
-fetch(urlAPI)
+fetch(urlAPI)//Get all products
     .then(response => response.json())
 
     .then((data) => {
