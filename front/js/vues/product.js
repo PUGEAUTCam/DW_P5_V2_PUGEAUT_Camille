@@ -55,9 +55,9 @@ idAddToCart.addEventListener('click', () => {
     let finalProduct = {
         id: id,
         color: colorsChoice,
-        quantity: quantity,
+        quantity: Number(quantity),
     }
-
+    
     //Je verifie que le client indique la couleur et la qté, si oui j'applique la fonction addBasket en passant en parametre mon finalProduct pour stocker mes 3 donnees dans le LS
 
     if (colorsChoice === '') {
@@ -66,7 +66,7 @@ idAddToCart.addEventListener('click', () => {
         alert('Veuillez renseigner une quantité');
     } else {
         addBasket(finalProduct);
-        confirm();
+        // confirm();
     }
 
 });

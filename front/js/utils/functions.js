@@ -1,15 +1,15 @@
 
                                             //PAGE PRODUCT          
 // Fonction confirmation = renvoi au panier// ou annuler les articles + renvoi a l'accueil
-const confirm = () => {
-    if (window.confirm(`Le produit a bien été ajouté à votre panier.`)) {
-        window.location.href = './cart.html';
-    }
-    else {
-        localStorage.removeItem('products');
-        window.location.href = './script.html';
-    }
-}
+// const confirm = () => {
+//     if (window.confirm(`Le produit a bien été ajouté à votre panier.`)) {
+//         window.location.href = './cart.html';
+//     }
+//     else {
+//         localStorage.removeItem('products');
+//         window.location.href = './script.html';
+//     }
+// }
 
 
 //@Set le produit dans LS au format linearisé
@@ -33,14 +33,25 @@ const addBasket = (product) => {
 
     //Condition pour verifier si 2 produits ont le meme id et la meme couleur, si oui on incremente simplement la ligne du panier
     let existProduct = storageProducts.find(c => c.id === product.id && c.color === product.color)
+
     if (existProduct != undefined) {
-        existProduct.quantity++;
+        existProduct.quantity = existProduct.quantity + product.quantity; 
     } else {
-        product.quantity = 1;
         storageProducts.push(product);
     }
     saveBasket(storageProducts);
 };
+
+//Fonction pour changer la quantité du produit 
+
+
+//Fonction pour supprimer un produit du LS, en filtrant pour garder tous les produits dont l'id est different de l'id passé en argument
+// const removeProductFromBasket = (product) => {
+//     let storageProducts = getBasket();
+//     storageProducts = storageProducts.filter(p => p.id != product.id);
+//     saveBasket();
+
+// }
 
                                             //PAGE PANIER CART
  
