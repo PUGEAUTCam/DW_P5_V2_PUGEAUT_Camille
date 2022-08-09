@@ -13,12 +13,11 @@ const cart = async () => {
         .then(response => response.json())
         .catch(() => document.querySelector('#cart__items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
 
-
-    //Apelle de la fonction complete product pour creer un tableau a partir des donnees API et du LS
-    let completeProductInBasket = completeProduct(productsInBasket, products);
-
     //Fonctin pour implementation des donnees recuperees dans le HTMl
     const cardKanap = () => {
+
+        let completeProductInBasket = completeProduct(products);
+
         let content = ``;
 
         for (let index = 0; index < completeProductInBasket.length; index++) {
@@ -45,7 +44,7 @@ const cart = async () => {
                                 </div>
                                 <div class="cart__item__content__settings">
                                     <div class="cart__item__content__settings__quantity">
-                                        <p>Qté : ${kanapQuantity}</p>
+                                        <p id= "product-quantity-${kanapId}">Qté : ${kanapQuantity}</p>
                                         <input type="number" class="itemQuantity" name="itemQuantity" min="1" max="100"
                                             value="${kanapQuantity}">
                                     </div>
@@ -56,42 +55,47 @@ const cart = async () => {
                             </div>
                         </article> `
         }
+
         document.querySelector('#cart__items').innerHTML = content;
     };
+
     cardKanap();
 
-
-    const inputQuantity = document.querySelectorAll('.itemQuantity'); //Selection du ou des input QTE
-    const cartItem = document.querySelectorAll('.cart__item');
+    const inputQuantity = document.querySelectorAll('.itemQuantity');
+    const cartItem = document.querySelectorAll('.cart__item'); 
 
     //Fonction pour changer la quantite 
     const changeQuantityFromBasket = () => {
 
+        let completeProductInBasket = completeProduct(products);
+
+        
         inputQuantity.forEach(input => { //Boucle sur chaque input, j'ajoute une ecoute lors du changement de celui-ci
 
             input.addEventListener('change', () => {
-
                 for (let index = 0; index < completeProductInBasket.length; index++) {
 
                     if (completeProductInBasket[index].id === cartItem[index].dataset.id && completeProductInBasket[index].color === cartItem[index].dataset.color) {
 
                         completeProductInBasket[index].quantity = (Number(inputQuantity[index].value));
-                        saveBasket(completeProductInBasket);
 
+                        saveBasket(productsInBasket);
+                        document.querySelector(`#product-quantity-${completeProductInBasket[index].id}`).textContent = `Qté : ` + completeProductInBasket[index].quantity;
                     }
-                };
+                }; 
+                displayTotal();
             });
+           
         });
-
     };
     changeQuantityFromBasket();
-
 
     // Fonction pour supprimer le panier du DOM et LS
 
     let buttonDelete = document.querySelectorAll('.deleteItem');
 
     const removeProductFromBasket = () => {
+        let completeProductInBasket = completeProduct(products);
 
         buttonDelete.forEach(button => {
 
@@ -99,21 +103,44 @@ const cart = async () => {
 
                 for (let index = 0; index < completeProductInBasket.length; index++) {
 
-                    if (completeProductInBasket[index].id === cartItem[index].dataset.id && completeProductInBasket[index].color === cartItem[index].dataset.color){
+                    if (completeProductInBasket[index].id === cartItem[index].dataset.id && completeProductInBasket[index].color === cartItem[index].dataset.color) {
 
                         let product = completeProductInBasket.filter(p => p.id != completeProductInBasket[index].id || p.color != completeProductInBasket[index].color);
                         saveBasket(product);
-                        location.reload();
+                        
                     }
                 }
+                cardKanap();
+                displayTotal();
             });
         });
     };
     removeProductFromBasket();
 
 
+    //Fonction pour afficher 
 
+    const displayTotal = () =>  {
 
+        let completeProductInBasket = completeProduct(products);
+
+        let totalValue = {
+            price: 0,
+            quantity: 0,
+        }
+
+        for (let index = 0; index < completeProductInBasket.length; index++) {
+
+            totalValue.quantity += completeProductInBasket[index].quantity;
+            totalValue.price += completeProductInBasket[index].price * completeProductInBasket[index].quantity;            
+        }
+
+        document.querySelector('#totalQuantity').textContent =  totalValue.quantity ;
+        document.querySelector('#totalPrice').textContent =  totalValue.price;
+
+    }
+
+    displayTotal();
 
 
 

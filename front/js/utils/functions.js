@@ -42,21 +42,14 @@ const addBasket = (product) => {
     saveBasket(storageProducts);
 };
 
-//Fonction pour changer la quantité du produit 
 
-
-//Fonction pour supprimer un produit du LS, en filtrant pour garder tous les produits dont l'id est different de l'id passé en argument
-// const removeProductFromBasket = (product) => {
-//     let storageProducts = getBasket();
-//     storageProducts = storageProducts.filter(p => p.id != product.id);
-//     saveBasket();
-
-// }
 
                                             //PAGE PANIER CART
  
 //Fonction pour obtenir le produit completé, je fusionne avec spread chaque objet du tableau en fonction de l'ID
- const completeProduct = (productsInBasket, products) => {
+ const completeProduct = (products) => {
+
+    const productsInBasket = JSON.parse(localStorage.getItem('products'));
 
     for (let index = 0; index < productsInBasket.length; index++) {
         for (let index2 = 0; index2 < products.length; index2++) {
@@ -71,7 +64,12 @@ const addBasket = (product) => {
         }   
     }
     return productsInBasket
-}
+};
+
+
+
+
+
 
 
 
