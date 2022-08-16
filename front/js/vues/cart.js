@@ -2,20 +2,20 @@ const cart = async () => {
     //Recuperation du tableau d'objets enregistres dans le Local Storage 
     const productsInBasket = JSON.parse(localStorage.getItem('products'));
 
-    if (productsInBasket === null) {
+    if (productsInBasket === null || productsInBasket.length === 0) {
         document.querySelector('.basket').textContent = 'Votre panier est vide';
     }
 
     //Get all products pour recuperer les donnees qui me manquent dans le LS
     let urlAPI = 'http://localhost:3000/api/products/';
-    const products = await fetch(urlAPI)
+    const fetchProducts = await fetch(urlAPI)
         .then(response => response.json())
         .catch(() => document.querySelector('#cart__items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
 
-    //Fonctin pour implementation des donnees recuperees dans le HTMl
+    //Fonction pour implementation dans DOM des donnees recuperees de l'API et LS, grace a la fonction completeProduct
     const cardKanap = () => {
 
-        let completeProductInBasket = completeProduct(products);
+        let completeProductInBasket = completeProduct(fetchProducts);
 
         let content = ``;
 
@@ -62,21 +62,18 @@ const cart = async () => {
 
     //Fonction pour changer la quantite 
     const changeQuantityFromBasket = () => {
-
         const inputsQuantity = document.querySelectorAll('.itemQuantity');
 
         inputsQuantity.forEach((input, index) => { //Boucle sur chaque input, j'ajoute une ecoute lors du changement de celui-ci
             input.addEventListener('change', () => {
-                let completeProductInBasket = completeProduct(products);
+                let completeProductInBasket = completeProduct(fetchProducts);
                 const id = cartItems[index].dataset.id;
                 const color = cartItems[index].dataset.color;
-
                 const indexInBasket = completeProductInBasket.findIndex(item => item.id === id && item.color === color)
 
-
-                completeProductInBasket[indexInBasket].quantity = (Number(input.value));
-                saveBasket(completeProductInBasket);
-                input.previousElementSibling.innerHTML = `Qté : ` + completeProductInBasket[index].quantity;
+                completeProductInBasket[indexInBasket].quantity = (Number(input.value)); // La qté de l'input devient celle du LS
+                saveBasket(completeProductInBasket); // On sauvegarde le LS
+                input.previousElementSibling.innerHTML = `Qté : ` + completeProductInBasket[index].quantity; // On affiche dans le DOM notre nouvelle qté
 
                 displayTotal();
             });
@@ -86,35 +83,32 @@ const cart = async () => {
     changeQuantityFromBasket();
 
     // Fonction pour supprimer le panier du DOM et LS
+    const removeProductFromBasket = () => {
 
+        let buttonDelete = document.querySelectorAll('.deleteItem');
 
-    // const removeProductFromBasket = () => {
+        buttonDelete.forEach((button, index) => {
+            button.addEventListener('click', () => {
+                let completeProductInBasket = completeProduct(fetchProducts);
+                const id = cartItems[index].dataset.id;
+                const color = cartItems[index].dataset.color;
+                const indexInBasket = completeProductInBasket.findIndex(item => item.id === id && item.color === color)
 
-    //     let buttonDelete = document.querySelectorAll('.deleteItem');
+                let product = completeProductInBasket.filter(p => p.id != completeProductInBasket[index].id || p.color != completeProductInBasket[index].color);
 
-    //     buttonDelete.forEach(button => {
-    //         button.addEventListener('click', () => {
+                saveBasket(product);
+                cardKanap();
+                window.location.reload();
+                displayTotal();
+            });
+        });
+    };
+    removeProductFromBasket();
 
-
-    //             let completeProductInBasket = completeProduct(products);
-    //             for (let index = 0; index < completeProductInBasket.length; index++) {
-
-    //                 if (completeProductInBasket[index].id === cartItems[index].dataset.id && completeProductInBasket[index].color === cartItems[index].dataset.color) {
-    //                     let product = completeProductInBasket.filter(p => p.id != completeProductInBasket[index].id || p.color != completeProductInBasket[index].color);
-    //                     saveBasket(product);
-    //                 }
-    //             }
-    //             cardKanap();
-    //             displayTotal();
-    //         });
-    //     });
-    // };
-    // removeProductFromBasket();
-
-    //Fonction pour afficher 
+    //Fonction pour afficher la qté et prix total 
     const displayTotal = () => {
 
-        let completeProductInBasket = completeProduct(products);
+        let completeProductInBasket = completeProduct(fetchProducts);
 
         let totalValue = {
             price: 0,
@@ -131,7 +125,10 @@ const cart = async () => {
     }
     displayTotal();
 
-    // Verification du formualaire Creation des RegExp
+
+
+
+    // Verification du formualaire : Creation des RegExp
     let orderButton = document.querySelector('#order');
     let form = document.querySelector('.cart__order__form');
     let generalRegEx = /^[a-zA-Zà-żÀ-Ż-\s+-]+$/;
@@ -141,7 +138,7 @@ const cart = async () => {
     orderButton.addEventListener('click', (e) => {
 
         e.preventDefault();
-
+        //Creation de l'objet contact pour la requete POST 
         let contact = {
             firstName: form.firstName.value,
             lastName: form.lastName.value,
@@ -150,6 +147,7 @@ const cart = async () => {
             email: form.email.value,
         }
 
+        //Une fonction pour chaque verification par Regex
         const validFistName = () => {
             let isValid = generalRegEx.test(contact.firstName);
             form.firstName.nextElementSibling.innerHTML = isValid ? '' : 'Veuillez entrer un prénom valide';
@@ -180,6 +178,8 @@ const cart = async () => {
             return isValid
         };
 
+
+        //Si tous les elements du formulaire sont true et que le LS n'est pas null, alors requete POST au backend pour recuperer ensuite le numero de commande
         if (
             validFistName() === true &&
             validLastName() === true &&
@@ -187,50 +187,30 @@ const cart = async () => {
             validCity() === true &&
             validEmail() === true
         ) {
-            // let completeProductInBasket = completeProduct(products);
-            // console.log(completeProductInBasket);
+            let completeProductInBasket = completeProduct(fetchProducts);
+            if (completeProductInBasket == null || completeProductInBasket.length === 0) {
+                alert(`Votre panier est vide ! Veuillez selectionner vos futurs canapés`)
+            } else {
+                //Fonction POST pour envoyer l'objet 'contact' et le tableau 'products' d'ID au back, pour recevoir en retour le numero de commande
+                const fetchProductsPost = async () => {
 
-            // alert('Votre commande et le formulaire sont validés !');
-            // window.location.href = './confirmation.html'
-        }
+                    let products = completeProductInBasket.map(item => item.id); //Tableau products d'ID
+
+                    const orderProducts = await fetch(`http://localhost:3000/api/products/order`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ contact, products }),
+                    }).then(response => response.json()) 
+                    .catch(() => document.querySelector('#cart__items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
+
+                    //Je recupere orderId depuis fetch puis l'integre a l'URL pour pouvoir l'afficher sur la page confirmation
+                    let orderId = orderProducts.orderId;
+                    window.location.replace(`./confirmation.html?orderId=${orderId}`);
+                };
+                fetchProductsPost();
+            };
+        };
     });
-
-    let data = completeProductInBasket.map(item => item.id)
-
-
-
-    // http://localhost:3000/api/products/order
-
-
-    /**
-    *
-    * Expects request to contain:
-    * contact: {
-    *   firstName: string,
-    *   lastName: string,
-    *   address: string,
-    *   city: string,
-    *   email: string
-    * }
-    * products: [string] <-- array of product _id
-    *
-    */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 }
 
 cart();

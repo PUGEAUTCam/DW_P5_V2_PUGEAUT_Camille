@@ -43,10 +43,9 @@ const addBasket = (product) => {
 };
 
 
-
                                             //PAGE PANIER CART
  
-//Fonction pour obtenir le produit completé, je fusionne avec spread chaque objet du tableau en fonction de l'ID
+//Fonction pour obtenir le produit complet, je fusionne avec spread le LS et les données de l'API en fonction de l'ID de chaque produit, en un seul tableau 
  const completeProduct = (products) => {
 
     const productsInBasket = JSON.parse(localStorage.getItem('products'));

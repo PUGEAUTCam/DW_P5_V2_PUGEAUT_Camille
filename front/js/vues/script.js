@@ -30,7 +30,6 @@ const script = async () => {
     document.querySelector('#items').innerHTML = content;
 
 }
-
 script();
 
 
