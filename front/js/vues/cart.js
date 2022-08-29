@@ -10,16 +10,20 @@ const cart = async () => {
     let urlAPI = 'http://localhost:3000/api/products/';
     const fetchProducts = await fetch(urlAPI)
         .then(response => response.json())
-        .catch(() => document.querySelector('#cart__items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
+        .catch(() => {
+            document.querySelector('.basket').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.'
+            return []
+        });
 
-    //Fonction pour implementation dans DOM des donnees recuperees de l'API et LS, grace a la fonction completeProduct
+
+    //Fonction pour implementation dans le DOM les donnees recuperees de l'API et du LS, grace a la fonction completeProduct(utilisation du spread operator)
     const cardKanap = () => {
 
         let completeProductInBasket = completeProduct(fetchProducts);
 
         let content = ``;
 
-        for (let index = 0; index < completeProductInBasket.length; index++) {
+        for (let index = 0; index < completeProductInBasket?.length; index++) {
 
             const kanap = completeProductInBasket[index];
 
@@ -60,24 +64,23 @@ const cart = async () => {
 
     const cartItems = document.querySelectorAll('.cart__item');
 
-    //Fonction pour changer la quantite 
+    //Fonction pour changer la quantite
     const changeQuantityFromBasket = () => {
         const inputsQuantity = document.querySelectorAll('.itemQuantity');
 
         inputsQuantity.forEach((input, index) => { //Boucle sur chaque input, j'ajoute une ecoute lors du changement de celui-ci
             input.addEventListener('change', () => {
-                let completeProductInBasket = completeProduct(fetchProducts);
+
                 const id = cartItems[index].dataset.id;
                 const color = cartItems[index].dataset.color;
-                const indexInBasket = completeProductInBasket.findIndex(item => item.id === id && item.color === color)
+                const indexInBasket = productsInBasket.findIndex(item => item.id === id && item.color === color)
 
-                completeProductInBasket[indexInBasket].quantity = (Number(input.value)); // La qté de l'input devient celle du LS
-                saveBasket(completeProductInBasket); // On sauvegarde le LS
-                input.previousElementSibling.innerHTML = `Qté : ` + completeProductInBasket[index].quantity; // On affiche dans le DOM notre nouvelle qté
+                productsInBasket[indexInBasket].quantity = (Number(input.value)); // La qté de l'input devient celle du LS
+                saveBasket(productsInBasket); // On sauvegarde le LS
+                input.previousElementSibling.innerHTML = `Qté : ` + productsInBasket[index].quantity; // On affiche dans le DOM notre nouvelle qté
 
                 displayTotal();
             });
-
         });
     };
     changeQuantityFromBasket();
@@ -89,12 +92,10 @@ const cart = async () => {
 
         buttonDelete.forEach((button, index) => {
             button.addEventListener('click', () => {
-                let completeProductInBasket = completeProduct(fetchProducts);
                 const id = cartItems[index].dataset.id;
                 const color = cartItems[index].dataset.color;
-                const indexInBasket = completeProductInBasket.findIndex(item => item.id === id && item.color === color)
 
-                let product = completeProductInBasket.filter(p => p.id != completeProductInBasket[index].id || p.color != completeProductInBasket[index].color);
+                let product = productsInBasket.filter(p => p.id != productsInBasket[index].id || p.color != productsInBasket[index].color);
 
                 saveBasket(product);
                 cardKanap();
@@ -105,6 +106,7 @@ const cart = async () => {
     };
     removeProductFromBasket();
 
+
     //Fonction pour afficher la qté et prix total 
     const displayTotal = () => {
 
@@ -114,7 +116,7 @@ const cart = async () => {
             price: 0,
             quantity: 0,
         }
-        for (let index = 0; index < completeProductInBasket.length; index++) {
+        for (let index = 0; index < completeProductInBasket?.length; index++) {
 
             totalValue.quantity += completeProductInBasket[index].quantity;
             totalValue.price += completeProductInBasket[index].price * completeProductInBasket[index].quantity;
@@ -125,9 +127,6 @@ const cart = async () => {
     }
     displayTotal();
 
-
-
-
     // Verification du formualaire : Creation des RegExp
     let orderButton = document.querySelector('#order');
     let form = document.querySelector('.cart__order__form');
@@ -136,8 +135,9 @@ const cart = async () => {
     let emailRegEx = /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
 
     orderButton.addEventListener('click', (e) => {
+        console.log('dhd');
+        e.preventDefault(); // On empeche l'envoi par defaut du formulaire
 
-        e.preventDefault();
         //Creation de l'objet contact pour la requete POST 
         let contact = {
             firstName: form.firstName.value,
@@ -147,7 +147,7 @@ const cart = async () => {
             email: form.email.value,
         }
 
-        //Une fonction pour chaque verification par Regex
+        //Une fonction pour chaque verification du formualire par les Regex
         const validFistName = () => {
             let isValid = generalRegEx.test(contact.firstName);
             form.firstName.nextElementSibling.innerHTML = isValid ? '' : 'Veuillez entrer un prénom valide';
@@ -178,7 +178,6 @@ const cart = async () => {
             return isValid
         };
 
-
         //Si tous les elements du formulaire sont true et que le LS n'est pas null, alors requete POST au backend pour recuperer ensuite le numero de commande
         if (
             validFistName() === true &&
@@ -188,7 +187,9 @@ const cart = async () => {
             validEmail() === true
         ) {
             let completeProductInBasket = completeProduct(fetchProducts);
-            if (completeProductInBasket == null || completeProductInBasket.length === 0) {
+            const productsInBasket = JSON.parse(localStorage.getItem('products'));
+
+            if (!productsInBasket || productsInBasket?.length === 0) {
                 alert(`Votre panier est vide ! Veuillez selectionner vos futurs canapés`)
             } else {
                 //Fonction POST pour envoyer l'objet 'contact' et le tableau 'products' d'ID au back, pour recevoir en retour le numero de commande
@@ -200,10 +201,10 @@ const cart = async () => {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({ contact, products }),
-                    }).then(response => response.json()) 
-                    .catch(() => document.querySelector('#cart__items').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
+                    }).then(response => response.json())
+                        .catch(() => document.querySelector('.basket').textContent = 'Oups ! La page que vous cherchez ne semble pas disponible. Nos canapés reviennent bientôt.');
 
-                    //Je recupere orderId depuis fetch puis l'integre a l'URL pour pouvoir l'afficher sur la page confirmation
+                    //Je recupere orderId depuis fetch pour l'integrer a l'URL afin de pouvoir l'afficher sur la page confirmation
                     let orderId = orderProducts.orderId;
                     window.location.replace(`./confirmation.html?orderId=${orderId}`);
                 };
@@ -212,5 +213,4 @@ const cart = async () => {
         };
     });
 }
-
 cart();

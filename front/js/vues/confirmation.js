@@ -5,4 +5,9 @@ const orderId = params.get('orderId');
 // Je l'affiche dans le DOM
 document.querySelector('#orderId').textContent = orderId;
 
+//Je supprime le panier une fois que la commande est validee 
+localStorage.removeItem('products');
+
+
+
 
